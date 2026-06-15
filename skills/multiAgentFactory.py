@@ -187,7 +187,7 @@ def load_config(config_path: Optional[str] = None) -> dict:
         with open(str(default_cfg), "r", encoding="utf-8") as f:
             return yaml.safe_load(f)
             
-    print(f"[!] 警告: 未找到配置文件，请运行 python skill.py --init-config")
+    print(f"[!] 警告: 未找到配置文件，请运行 python multiAgentFactory.py --init-config")
     return {"llm": {}, "agents": {"Router": {"prompt": "你是一个路由节点"}}}
 
 def create_api_server(factory: MultiAgentFactory):
