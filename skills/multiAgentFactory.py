@@ -1,5 +1,5 @@
 # ============================================================
-# multiAgentFactory.py — 通用多智能体工厂 (终极融合版)
+# multiAgentFactory.py — 通用多智能体工厂
 # ============================================================
 # 融合了面向对象(OOP)的优雅与 YAML 配置驱动的灵活。
 # 既可作为包被 import，也可作为独立服务运行。
@@ -52,12 +52,7 @@ class MultiAgentFactory:
         self.valid_targets = list(self.agents_cfg.keys()) if self.agents_cfg else ["Agent"]
         
         # 1. 初始化 LLM
-        self.llm = ChatOpenAI(
-            model=self.llm_cfg.get("model", "gpt-4o"),
-            base_url=self.llm_cfg.get("base_url", "http://127.0.0.1:4000/v1"),
-            api_key=self.llm_cfg.get("api_key", "sk-default"),
-            temperature=self.llm_cfg.get("temperature", 0),
-        )
+        self.llm = ChatOpenAI(base_url="http://127.0.0.1:4000/v1", api_key="sk-factory", model="expert-brain", temperature=0)
 
         # 2. 动态构建工具并绑定
         self.transfer_tool = self._create_transfer_tool()
@@ -187,7 +182,7 @@ def load_config(config_path: Optional[str] = None) -> dict:
         with open(str(default_cfg), "r", encoding="utf-8") as f:
             return yaml.safe_load(f)
             
-    print(f"[!] 警告: 未找到配置文件，请运行 python multiAgentFactory.py --init-config")
+    print(f"[!] 警告: 未找到配置文件，请运行 python skill.py --init-config")
     return {"llm": {}, "agents": {"Router": {"prompt": "你是一个路由节点"}}}
 
 def create_api_server(factory: MultiAgentFactory):
@@ -222,22 +217,71 @@ def create_api_server(factory: MultiAgentFactory):
 
 
 # ==========================================================
-# 4. 主程序入口
+# 4. 主程序入口与辅助配置
 # ==========================================================
+def _generate_default_config(path: str):
+    """生成默认 YAML 配置文件"""
+    sample = """# ============================================================
+# agents.yaml — 多智能体工厂配置文件
+# ============================================================
+# ---------- LLM 后端配置 ----------
+llm:
+  model: "gpt-4o"                          
+  base_url: "http://127.0.0.1:4000/v1"     
+  api_key: "sk-your-key"                   
+  temperature: 0                            
+
+# ---------- 员工名册 (Agent 定义) ----------
+agents:
+  Architect:
+    prompt: |
+      你是一个产品架构师。负责拆解需求，不写具体代码。
+      规划好技术方案后，务必移交给 Coder。
+  Coder:
+    prompt: |
+      你是一个全栈开发。负责根据架构师的方案写代码。
+      代码写完后，不需要移交，直接输出结果。
+
+# ---------- 流水线控制 ----------
+initial_agent: "Architect"    
+recursion_limit: 20           
+"""
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(sample)
+
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="通用多智能体工厂 (终极融合版)")
     parser.add_argument("--config", "-c", help="YAML 配置文件路径")
     parser.add_argument("--input", "-i", help="用户输入需求 (默认交互式)")
     parser.add_argument("--serve", "-s", action="store_true", help="启动 HTTP API 服务")
+    # 补回缺少的 --init-config 参数
+    parser.add_argument("--init-config", action="store_true", help="生成默认配置文件后退出")
     args = parser.parse_args()
 
+    # 补回初始化配置的逻辑
+    if args.init_config:
+        root = Path(__file__).resolve().parent
+        cfg_dir = root / "config"
+        cfg_dir.mkdir(exist_ok=True)
+        cfg_file = cfg_dir / "agents.yaml"
+        if not cfg_file.exists():
+            _generate_default_config(str(cfg_file))
+            print(f"📝 已成功生成默认配置文件: {cfg_file}")
+            print("   请编辑该文件配置你的模型参数后，再次运行 python multiAgentFactory.py")
+        else:
+            print(f"📝 配置文件已存在: {cfg_file}")
+        return
+
+    # 正常运行逻辑
     config = load_config(args.config)
-    factory = MultiAgentFactory(config) # 实例化 OOP 核心类
+    factory = MultiAgentFactory(config)
 
     if args.serve:
         create_api_server(factory)
     else:
         user_input = args.input or input("请输入需求: ").strip()
+        if not user_input:
+            user_input = "帮我用 Python 写一个简单的计算器"
         print("\n" + "=" * 50)
         factory.invoke(user_input)
         print("\n" + "=" * 50 + "\n🎉 流水线执行结束")
