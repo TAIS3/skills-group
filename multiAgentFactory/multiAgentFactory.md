@@ -2,7 +2,7 @@
 
 > **高度解耦、配置驱动、即插即用的多智能体状态机引擎**
 
-`skill.py` 是一个基于 LangGraph 构建的通用多智能体协同模块。它融合了**面向对象 (OOP) 的优雅封装**与 **YAML 动态配置的灵活性**。你可以将它作为普通的 Python 类导入到你的复杂业务线中（如 OpenClaw），也可以通过一条命令将其作为独立的 HTTP API 服务或终端交互程序启动。
+`multiAgentFactory.py` 是一个基于 LangGraph 构建的通用多智能体协同模块。它融合了**面向对象 (OOP) 的优雅封装**与 **YAML 动态配置的灵活性**。你可以将它作为普通的 Python 类导入到你的复杂业务线中（如 OpenClaw），也可以通过一条命令将其作为独立的 HTTP API 服务或终端交互程序启动。
 
 ## ✨ 核心特性
 
@@ -32,7 +32,7 @@ pip install langchain-core langchain-openai langgraph pyyaml
 
 ### 姿势一：作为 Python 包导入 (推荐用于复杂项目/子节点集成)
 
-这是最标准、最优雅的调用方式。将 `skill.py` 放在你的项目目录下，像使用普通类一样实例化它。
+这是最标准、最优雅的调用方式。将 `multiAgentFactory.py` 放在你的项目目录下，像使用普通类一样实例化它。
 
 ```python
 # main_app.py
@@ -75,7 +75,7 @@ print(f"最终回复内容: {messages[-1].content}")
 第一次运行，建议先生成一个模板配置文件：
 
 ```bash
-python skill.py --init-config
+python multiAgentFactory.py --init-config
 
 ```
 
@@ -84,7 +84,7 @@ python skill.py --init-config
 **2. 交互式聊天测试**
 
 ```bash
-python skill.py
+python multiAgentFactory.py
 
 ```
 
@@ -93,7 +93,7 @@ python skill.py
 **3. 单次静默执行**
 
 ```bash
-python skill.py -i "写一个冒泡排序并交给QA测试"
+python multiAgentFactory.py -i "写一个冒泡排序并交给QA测试"
 
 ```
 
@@ -104,9 +104,9 @@ python skill.py -i "写一个冒泡排序并交给QA测试"
 **1. 启动服务**
 
 ```bash
-python skill.py --serve
+python multiAgentFactory.py --serve
 # 或者指定自定义配置文件启动
-# FACTORY_CONFIG=my_agents.yaml python skill.py --serve
+# FACTORY_CONFIG=my_agents.yaml python multiAgentFactory.py --serve
 
 ```
 
